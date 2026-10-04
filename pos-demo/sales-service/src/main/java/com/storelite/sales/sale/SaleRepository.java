@@ -59,6 +59,7 @@ public class SaleRepository {
                 WHERE sale_id IN (:ids) ORDER BY sale_id, line_no""")
                 .param("ids", headers.stream().map(Header::id).toList())
                 .query(LineWithSale.class)
+                .list()   // not .stream(): that holds the connection open until the stream is closed
                 .stream()
                 .collect(Collectors.groupingBy(LineWithSale::saleId, Collectors.mapping(
                         l -> new SaleLineRow(l.sku(), l.name(), l.unitPriceCents(), l.quantity()),

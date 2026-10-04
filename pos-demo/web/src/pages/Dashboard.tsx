@@ -45,7 +45,7 @@ export function Dashboard() {
               <th>Product</th>
               <th className="num">Price</th>
               <th className="num">Stock</th>
-              <th className="num">Threshold</th>
+              <th className="num hide-sm">Threshold</th>
               <th />
             </tr>
           </thead>
@@ -53,11 +53,11 @@ export function Dashboard() {
             {products.data?.map((p) => (
               <tr key={p.sku} className={p.lowStock ? 'low-row' : undefined}>
                 <td>
-                  {p.name} <span className="muted mono">{p.sku}</span>
+                  {p.name} <span className="muted mono hide-sm">{p.sku}</span>
                 </td>
                 <td className="num">{formatCents(p.priceCents)}</td>
                 <td className="num">{p.stock}</td>
-                <td className="num">{p.lowStockThreshold}</td>
+                <td className="num hide-sm">{p.lowStockThreshold}</td>
                 <td className="num">
                   <button type="button" disabled={restock.isPending} onClick={() => restock.mutate(p.sku)}>
                     +{RESTOCK_QTY}

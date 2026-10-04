@@ -42,7 +42,10 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest
+// A small pool with a short timeout turns a connection leak into a fast, visible failure.
+@SpringBootTest(properties = {
+        "spring.datasource.hikari.maximum-pool-size=3",
+        "spring.datasource.hikari.connection-timeout=2000"})
 @AutoConfigureMockMvc
 @Testcontainers
 class SalesIntegrationTest {
@@ -102,6 +105,18 @@ class SalesIntegrationTest {
         mvc.perform(get("/api/sales"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.id == '" + saleId + "')].lines.length()").value(2));
+    }
+
+    @Test
+    void listingSalesRepeatedlyDoesNotLeakConnections() throws Exception {
+        // The dashboard polls this endpoint; the line query only runs when the day has sales.
+        mvc.perform(post("/api/sales").contentType(MediaType.APPLICATION_JSON).content("""
+                        {"tenderType": "CASH", "lines": [{"sku": "MILK-1L", "quantity": 1}]}"""))
+                .andExpect(status().isCreated());
+
+        for (int i = 0; i < 10; i++) {
+            mvc.perform(get("/api/sales")).andExpect(status().isOk());
+        }
     }
 
     @Test
