@@ -27,4 +27,6 @@ class Cart:
 
     def average_price(self) -> float:
         count = sum(i.quantity for i in self.items)
+        if count == 0:
+            return 0.0
         return sum(i.price * i.quantity for i in self.items) / count
